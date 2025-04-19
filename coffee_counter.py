@@ -9,7 +9,6 @@ from tkinter import filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-
 DATA_FILE = "coffee_data.json"
 
 class CoffeeTrackerApp(ctk.CTk):
@@ -26,7 +25,7 @@ class CoffeeTrackerApp(ctk.CTk):
 
         self.balance_label = None
         self.default_price_entry = None
-        self.topup_entry = None
+        self.top_up_entry = None
 
         self.load_data()
         self.create_widgets()
@@ -52,35 +51,35 @@ class CoffeeTrackerApp(ctk.CTk):
     def create_widgets(self):
         # Balance Label
         self.balance_label = ctk.CTkLabel(self, text="Balance: 0.00,- CZK", font=("Arial", 18))
-        self.balance_label.pack(pady=10, anchor="w", padx=20)
+        self.balance_label.pack(pady=(15, 0), anchor="w", padx=20)
 
         # Top-up and Coffee Purchase Buttons
         buy_frame = ctk.CTkFrame(self, fg_color="transparent")
-        buy_frame.pack(pady=5, anchor="w", padx=20)
-        ctk.CTkButton(buy_frame, text="Buy Coffee ☕", command=self.buy_coffee, width=150, fg_color="green").pack(side="left", padx=(0, 5))
-        ctk.CTkButton(buy_frame, text="❌", width=30, command=self.undo_coffee, fg_color="red").pack(side="left")
+        buy_frame.pack(pady=15, anchor="w", padx=20)
+        ctk.CTkButton(buy_frame, text="Buy Coffee ☕", command=self.buy_coffee, width=150, fg_color="green", border_color=("black", "white"), border_width=1).pack(side="left", padx=(0, 5))
+        ctk.CTkButton(buy_frame, text="❌", width=30, command=self.undo_coffee, fg_color="red", border_color=("black", "white"), border_width=1).pack(side="left")
 
         # Top-up Entry and Buttons
-        self.topup_entry = ctk.CTkEntry(self, placeholder_text="Top-up amount", width=150)  # Adjusted input width
-        self.topup_entry.pack(pady=2, anchor="w", padx=20)
-        topup_frame = ctk.CTkFrame(self, fg_color="transparent")
-        topup_frame.pack(pady=5, anchor="w", padx=20)
-        ctk.CTkButton(topup_frame, text="Add Top-up", command=self.add_topup, width=150).pack(side="left", padx=(0, 5))
-        ctk.CTkButton(topup_frame, text="❌", width=30, command=self.undo_topup, fg_color="red").pack(side="left")
+        self.top_up_entry = ctk.CTkEntry(self, placeholder_text="Top-up amount", width=180, justify="center")
+        self.top_up_entry.pack(pady=2, anchor="w", padx=20)
+        top_up_frame = ctk.CTkFrame(self, fg_color="transparent")
+        top_up_frame.pack(pady=5, anchor="w", padx=20)
+        ctk.CTkButton(top_up_frame, text="Add Top-up", command=self.add_topup, width=150, border_color=("black", "white"), border_width=1).pack(side="left", padx=(0, 5))
+        ctk.CTkButton(top_up_frame, text="❌", width=30, command=self.undo_top_up, fg_color="red", border_color=("black", "white"), border_width=1).pack(side="left")
 
         # Default Coffee Price Entry and Buttons
-        self.default_price_entry = ctk.CTkEntry(self, placeholder_text="Set coffee price", width=150)  # Adjusted input width
-        self.default_price_entry.pack(pady=2, anchor="w", padx=20)
-        ctk.CTkButton(self, text="Update Coffee Price", command=self.set_default_price, width=150).pack(pady=5, anchor="w", padx=20)
+        self.default_price_entry = ctk.CTkEntry(self, placeholder_text="Set coffee price", width=180, justify="center")
+        self.default_price_entry.pack(pady=5, anchor="w", padx=20)
+        ctk.CTkButton(self, text="Update Coffee Price", command=self.set_default_price, width=180).pack(pady=5, anchor="w", padx=20)
 
         # Statistics and History Buttons
-        ctk.CTkButton(self, text="📊 Show Stats", command=self.show_stats_window, width=150).pack(pady=10, anchor="w", padx=20)
+        ctk.CTkButton(self, text="📊 Show Stats", command=self.show_stats_window, width=180).pack(pady=10, anchor="w", padx=20)
 
 
     def show_stats_window(self):
         stats_window = ctk.CTkToplevel(self)
         stats_window.title("Statistics")
-        stats_window.geometry("300x300")
+        stats_window.geometry("200x220")
 
         ctk.CTkLabel(stats_window, text="Statistics & History", font=("Arial", 16)).pack(pady=10)
 
@@ -90,9 +89,9 @@ class CoffeeTrackerApp(ctk.CTk):
         ctk.CTkButton(stats_window, text="📊 Show Monthly Summary", command=self.show_monthly_summary).pack(pady=5)
 
     def update_balance(self):
-        total_topups = sum(t['amount'] for t in self.top_ups)
+        total_top_ups = sum(t['amount'] for t in self.top_ups)
         total_spent = sum(c['price'] for c in self.coffees)
-        self.balance = total_topups - total_spent
+        self.balance = total_top_ups - total_spent
 
         balance_text = f"Balance: {self.balance:.2f},-CZK"
         if self.balance < 10:
@@ -104,14 +103,14 @@ class CoffeeTrackerApp(ctk.CTk):
 
     def add_topup(self):
         try:
-            amount = float(self.topup_entry.get())
+            amount = float(self.top_up_entry.get())
             self.top_ups.append({"amount": amount, "date": str(date.today())})
-            self.topup_entry.delete(0, 'end')
+            self.top_up_entry.delete(0, 'end')
             self.update_balance()
         except ValueError:
             print("Invalid top-up value")
 
-    def undo_topup(self):
+    def undo_top_up(self):
         if self.top_ups:
             self.top_ups.pop()
             self.update_balance()
@@ -214,8 +213,8 @@ class CoffeeTrackerApp(ctk.CTk):
         fig.tight_layout()
 
         for bar, total in zip(bars, totals):
-            yval = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width() / 2, yval + 0.3, f"{yval:.2f}", ha='center', va='bottom', fontsize=8)
+            y_val = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width() / 2, y_val + 0.3, f"{y_val:.2f}", ha='center', va='bottom', fontsize=8)
 
         canvas = FigureCanvasTkAgg(fig, master=chart_window)
         canvas.draw()
